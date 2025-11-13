@@ -1,0 +1,66 @@
+# functions.js
+
+var getBonusedEmployees = function(employees,bonus){
+    var bonusemployee = [];
+    employees.forEach(function(item) {
+        Object.keys(item).forEach(function(key1) {
+            if(key1==="id")
+            {               
+                    Object.keys(bonus).forEach(function(key2) {
+                      if(item[key1]===key2 && bonus[key2]){
+                       //console.log("id:" + item["id"] + ",full name" + item["name"] + ",salary :" + item["salary"]);
+                       bonusemployee.push({id:item["id"],fullname:item["name"],salary:(item["salary"]+item["yearsWorking"]*1000)});
+                    }
+                    });
+                
+            }
+          
+        });
+    });
+    return bonusemployee;
+}
+
+module.exports = {
+    getBonusedEmployees: getBonusedEmployees
+};
+
+
+
+
+# callback.js
+
+
+var utils = require("./functions");
+var fs = require("fs");
+
+fs.readFile("employees.json", function (err, data) {
+  if (err) {
+    throw err;
+  }
+  var file1 = JSON.parse(data);
+
+  fs.readFile("bonuses.json", function (err, data) {
+    if (err) {
+      throw err;
+    }
+    var file2 = JSON.parse(data);
+
+    var bonusedemployees = utils.getBonusedEmployees(file1, file2);
+
+    var outdata = JSON.stringify(bonusedemployees);
+    fs.writeFile('bonusedEmployees.json', outdata, function (err) {
+      if (err) throw err;
+      console.log('Data written to file');
+
+      var logdata = [];
+      bonusedemployees.forEach(function (item) {
+        logdata.push({ fullname: item["fullname"], newsalary: item["salary"] });
+      });
+
+      fs.writeFile('log.txt', JSON.stringify(logdata), function (err) {
+        if (err) throw err;
+        console.log('Log Data written to file');
+      });
+    });
+  });
+});
